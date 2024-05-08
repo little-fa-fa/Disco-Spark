@@ -26,6 +26,23 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         // Load the lobby or main menu scene
         SceneManager.LoadScene("LobbyScene");
+        CleanUpResources();
+    }
+
+    private void CleanUpResources()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // Example: Optionally destroy all networked objects if you're the room's host
+            PhotonNetwork.DestroyAll();
+        }
+        else
+        {
+            // Handle client-specific clean-up, if any
+        }
+
+        // Additional clean-up logic here
+        Debug.Log("Clean-up of network resources complete.");
     }
 
     // Optionally handle failed attempt to leave a room

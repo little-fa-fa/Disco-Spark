@@ -3,6 +3,7 @@ using Photon.Pun;
 using UnityEngine.Windows.Speech; // Import for Unity's built-in speech recognition
 using System.Collections.Generic;
 using System.Linq;
+using Photon.Voice.Unity;
 
 public class Player : MonoBehaviourPun, IPunObservable
 {
@@ -12,6 +13,8 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private KeywordRecognizer keywordRecognizer;
     private Dictionary<string, System.Action> actions = new Dictionary<string, System.Action>();
+
+    
 
     void Start()
     {
@@ -25,6 +28,15 @@ public class Player : MonoBehaviourPun, IPunObservable
             keywordRecognizer = new KeywordRecognizer(actions.Keys.ToArray());
             keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
             keywordRecognizer.Start();
+
+        }
+    }
+
+    void Update()
+    {
+        if (photonView.IsMine)  // Example: push-to-talk
+        {
+            
         }
     }
 
