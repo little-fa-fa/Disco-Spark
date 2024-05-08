@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         // Load the lobby or main menu scene
-        SceneManager.LoadScene("LobbyScene");
+        SceneManager.LoadScene("Lobby");
         CleanUpResources();
     }
 
