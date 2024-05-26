@@ -10,25 +10,43 @@ public class Player : MonoBehaviourPun, IPunObservable
     public Rigidbody2D rb;
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
+    public float deceleration = 0.1f;
 
-    private KeywordRecognizer keywordRecognizer;
-    private Dictionary<string, System.Action> actions = new Dictionary<string, System.Action>();
+    private Recorder photonVoiceRecorder;
+    private bool isMoving = false;
+    private int sampleWindow = 128;
+    private Vector3 initialPosition;
 
-    
-
+    private Vector3 lastMousePosition;
+    [SerializeField]
+    private float mouseSpeedThreshold = 1f;
+    private bool isDragging = false;
     void Start()
     {
         if (photonView.IsMine)
         {
-            actions.Add("walk", Walk);
-            actions.Add("jump", Jump);
-            actions.Add("stop", Stop);
+            GameObject photonVoiceNetwork = GameObject.Find("PhotonVoiceNetwork");
+            if (photonVoiceNetwork != null)
+            {
+                photonVoiceRecorder = photonVoiceNetwork.GetComponentInChildren<Recorder>();
+                if (photonVoiceRecorder != null)
+                {
+                    photonVoiceRecorder.TransmitEnabled = true;
+                }
+                else
+                {
+                    Debug.LogError("Recorder component not found in PhotonVoiceNetwork");
+                }
+            }
+            else
+            {
+                Debug.LogError("PhotonVoiceNetwork GameObject not found");
+            }
+            lastMousePosition = Input.mousePosition;
+            Camera.main.transform.SetParent(transform);
+            Camera.main.transform.localPosition = new Vector3(0, 2, -10);
 
-            // Initialize the keyword recognizer and provide the list of commands
-            keywordRecognizer = new KeywordRecognizer(actions.Keys.ToArray());
-            keywordRecognizer.OnPhraseRecognized += RecognizedSpeech;
-            keywordRecognizer.Start();
-
+            initialPosition = transform.position;
         }
     }
 
@@ -36,17 +54,91 @@ public class Player : MonoBehaviourPun, IPunObservable
     {
         if (photonView.IsMine)  // Example: push-to-talk
         {
-            
+            if (isMoving)
+            {
+                float currentVolume = GetCurrentMicrophoneVolume();
+                rb.velocity = new Vector2(currentVolume, rb.velocity.y);
+            }
+            else if (rb.velocity.x != 0)
+            {
+                rb.velocity = new Vector2(Mathf.MoveTowards(rb.velocity.x, 0, deceleration * Time.deltaTime), rb.velocity.y);
+            }
+
+            if (Microphone.IsRecording(null) && !isMoving)
+            {
+                isMoving = true;
+            }
+            else if (!Microphone.IsRecording(null) && isMoving)
+            {
+                isMoving = false;
+            }
+            HandleMouseInput();
+
         }
     }
 
-    private void RecognizedSpeech(PhraseRecognizedEventArgs speech)
+    private void HandleMouseInput()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            lastMousePosition = Input.mousePosition;
+            isDragging = true;
+        }
+
+        if (Input.GetMouseButtonUp(0) && isDragging)
+        {
+            isDragging = false;
+            Vector3 currentMousePosition = Input.mousePosition;
+            float mouseSpeed = (currentMousePosition - lastMousePosition).magnitude / Time.deltaTime;
+
+            if (mouseSpeed > mouseSpeedThreshold)
+            {
+                Jump();
+            }
+        }
+
+        if (isDragging)
+        {
+            lastMousePosition = Input.mousePosition;
+        }
+    }
+    public void Kill()
     {
         if (photonView.IsMine)
         {
-            Debug.Log(speech.text);
-            actions[speech.text].Invoke();
+            Transform closestRespawnPoint = FindClosestRespawnPoint();
+            if (closestRespawnPoint != null)
+            {
+                transform.position = closestRespawnPoint.position;
+            }
+            else
+            {
+                transform.position = initialPosition;
+            }
         }
+    }
+
+    private Transform FindClosestRespawnPoint()
+    {
+        GameObject[] respawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
+        Transform closestRespawnPoint = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (GameObject respawnPoint in respawnPoints)
+        {
+            float distance = Vector3.Distance(transform.position, respawnPoint.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestRespawnPoint = respawnPoint.transform;
+            }
+        }
+
+        return closestRespawnPoint;
+    }
+    private float GetCurrentMicrophoneVolume()
+    {
+        return photonVoiceRecorder.LevelMeter.CurrentAvgAmp * 50;
     }
 
     void FixedUpdate()
@@ -59,13 +151,13 @@ public class Player : MonoBehaviourPun, IPunObservable
         // Process movement and jumping here if flags are used
     }
 
-    void Walk()
-    {
-        if (photonView.IsMine)
-        {
-            rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
-        }
-    }
+    //void Walk()
+    //{
+    //    if (photonView.IsMine)
+    //    {
+    //        rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
+    //    }
+    //}
 
     void Jump()
     {
@@ -83,14 +175,6 @@ public class Player : MonoBehaviourPun, IPunObservable
         }
     }
 
-    void OnDestroy()
-    {
-        if (photonView.IsMine && keywordRecognizer != null)
-        {
-            keywordRecognizer.Stop();
-            keywordRecognizer.Dispose();
-        }
-    }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
