@@ -171,6 +171,7 @@ MonoBehaviour:
   jumpForce: 5
   deceleration: 1
   mouseSpeedThreshold: 1
+  volumeText: {fileID: 0}
 --- !u!114 &5479610070120380238
 MonoBehaviour:
   m_ObjectHideFlags: 0

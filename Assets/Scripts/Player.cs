@@ -73,9 +73,10 @@ public class Player : MonoBehaviourPun, IPunObservable
             if (isMoving)
             {
                 float currentVolume = GetCurrentMicrophoneVolume();
+                int db = (int)(20 * Mathf.Log10(currentVolume)+40);
                 rb.velocity = new Vector2(currentVolume, rb.velocity.y);
-                //Debug.Log("Volume:" + currentVolume);
-                volumeText.text = "Volume: " + currentVolume.ToString("F2"); // Update the volume text
+                
+                volumeText.text = "Volume: " + (db).ToString(); // Update the volume text
 
                 Debug.Log("Current Volume: " + currentVolume);
             }
