@@ -4,6 +4,7 @@ using UnityEngine.Windows.Speech; // Import for Unity's built-in speech recognit
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Voice.Unity;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviourPun, IPunObservable
 {
@@ -21,6 +22,10 @@ public class Player : MonoBehaviourPun, IPunObservable
     [SerializeField]
     private float mouseSpeedThreshold = 1f;
     private bool isDragging = false;
+
+    //Test Volume
+    public Text volumeText;
+
     void Start()
     {
         if (photonView.IsMine)
@@ -48,6 +53,17 @@ public class Player : MonoBehaviourPun, IPunObservable
 
             initialPosition = transform.position;
         }
+ 
+        // Find the existing UI Text component for displaying volume
+            volumeText = GameObject.Find("VolumeText").GetComponent<Text>();
+        if (volumeText != null)
+        {
+            UnityEngine.Debug.Log("VolumeText UI component found");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("VolumeText UI component not found");
+        }
     }
 
     void Update()
@@ -58,6 +74,10 @@ public class Player : MonoBehaviourPun, IPunObservable
             {
                 float currentVolume = GetCurrentMicrophoneVolume();
                 rb.velocity = new Vector2(currentVolume, rb.velocity.y);
+                //Debug.Log("Volume:" + currentVolume);
+                volumeText.text = "Volume: " + currentVolume.ToString("F2"); // Update the volume text
+
+                Debug.Log("Current Volume: " + currentVolume);
             }
             else if (rb.velocity.x != 0)
             {
