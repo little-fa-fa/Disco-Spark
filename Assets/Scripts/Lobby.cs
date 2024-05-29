@@ -81,4 +81,9 @@ public class Lobby : MonoBehaviourPunCallbacks
         Debug.Log($"Joined room successfully, now loading play scene.");
         PhotonNetwork.LoadLevel("Tutorial");
     }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }

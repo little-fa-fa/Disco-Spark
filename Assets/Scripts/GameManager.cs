@@ -1,17 +1,20 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using Photon.Voice;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
     public GameObject playerPrefab;
     public GameObject spawnPoint;
+    public VoiceFollowClient voiceClient;
 
     void Start()
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
             PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+            voiceClient = FindAnyObjectByType<VoiceFollowClient>();
         }
     }
 
@@ -19,6 +22,9 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
+        PhotonNetwork.JoinLobby();
+        voiceClient.Disconnect();
+
     }
 
     // Photon callback triggered after leaving the room
@@ -35,6 +41,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             // Example: Optionally destroy all networked objects if you're the room's host
             PhotonNetwork.DestroyAll();
+            
         }
         else
         {
@@ -44,6 +51,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         // Additional clean-up logic here
         Debug.Log("Clean-up of network resources complete.");
     }
+
+
 
     // Optionally handle failed attempt to leave a room
 }

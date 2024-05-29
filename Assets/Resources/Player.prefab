@@ -168,9 +168,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 595663219497935255}
   moveSpeed: 0.5
-  jumpForce: 5
+  maxJumpForce: 10
   deceleration: 1
-  mouseSpeedThreshold: 1
   volumeText: {fileID: 0}
 --- !u!114 &5479610070120380238
 MonoBehaviour:

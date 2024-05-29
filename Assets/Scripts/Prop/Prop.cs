@@ -7,11 +7,18 @@ public class Prop : MonoBehaviour
     public float shrinkSpeed = 2f;
     public float followSpeed = 5f;
     public Vector3 targetScale = new Vector3(0.5f, 0.5f, 0.5f);
+    public Vector3 originalScale;
+    public Vector3 leftOffset = new Vector3(-1f, 0f, 0f);
 
-    private bool isPickedUp = false;
-    private Transform playerTransform;
+    protected bool isPickedUp = false;
+    protected Transform playerTransform;
 
-    void Update()
+    protected virtual void Start()
+    {
+        originalScale = transform.localScale;
+    }
+
+    protected virtual void Update()
     {
         if (!isPickedUp)
         {
@@ -23,7 +30,7 @@ public class Prop : MonoBehaviour
         }
     }
 
-    private void CheckForPickUp()
+    protected virtual void CheckForPickUp()
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, pickUpRange);
         foreach (Collider2D collider in colliders)
@@ -33,12 +40,13 @@ public class Prop : MonoBehaviour
                 playerTransform = collider.transform;
                 isPickedUp = true;
                 StartCoroutine(Shrink());
+                OnPickUp();
                 break;
             }
         }
     }
 
-    private IEnumerator Shrink()
+    protected virtual IEnumerator Shrink()
     {
         while (transform.localScale != targetScale)
         {
@@ -47,13 +55,34 @@ public class Prop : MonoBehaviour
         }
     }
 
-    private void FollowPlayer()
+    protected virtual IEnumerator Shrunk()
+    {
+        while (transform.localScale != originalScale)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, originalScale, Time.deltaTime * shrinkSpeed);
+            yield return null;
+        }
+    }
+
+    protected virtual void FollowPlayer()
     {
         if (playerTransform != null)
         {
-            transform.position = Vector3.Lerp(transform.position, playerTransform.position, Time.deltaTime * followSpeed);
+            Vector3 targetPosition = playerTransform.position + leftOffset;
+            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * followSpeed);
+        }
+        else
+        {
+            isPickedUp = false;
+            StartCoroutine(Shrunk());
         }
     }
+
+    protected virtual void OnPickUp()
+    {
+        // Override this method in derived classes to perform specific actions on pick up
+    }
+
 
     private void OnDrawGizmosSelected()
     {

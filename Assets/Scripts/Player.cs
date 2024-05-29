@@ -10,7 +10,7 @@ public class Player : MonoBehaviourPun, IPunObservable
 {
     public Rigidbody2D rb;
     public float moveSpeed = 5f;
-    public float jumpForce = 5f;
+    public float maxJumpForce = 6f;  // Maximum jump force
     public float deceleration = 0.1f;
 
     private Recorder photonVoiceRecorder;
@@ -18,10 +18,9 @@ public class Player : MonoBehaviourPun, IPunObservable
     private int sampleWindow = 128;
     private Vector3 initialPosition;
 
-    private Vector3 lastMousePosition;
-    [SerializeField]
-    private float mouseSpeedThreshold = 1f;
-    private bool isDragging = false;
+    private bool isChargingJump = false;
+    private float jumpChargeStartTime;
+    private float minJumpForce = 2f;
 
     //Test Volume
     public Text volumeText;
@@ -47,7 +46,6 @@ public class Player : MonoBehaviourPun, IPunObservable
             {
                 Debug.LogError("PhotonVoiceNetwork GameObject not found");
             }
-            lastMousePosition = Input.mousePosition;
             Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0, 2, -10);
 
@@ -55,7 +53,7 @@ public class Player : MonoBehaviourPun, IPunObservable
         }
  
         // Find the existing UI Text component for displaying volume
-            volumeText = GameObject.Find("VolumeText").GetComponent<Text>();
+        volumeText = GameObject.Find("VolumeText").GetComponent<Text>();
         if (volumeText != null)
         {
             UnityEngine.Debug.Log("VolumeText UI component found");
@@ -78,7 +76,6 @@ public class Player : MonoBehaviourPun, IPunObservable
                 
                 volumeText.text = "Volume: " + (db).ToString(); // Update the volume text
 
-                Debug.Log("Current Volume: " + currentVolume);
             }
             else if (rb.velocity.x != 0)
             {
@@ -100,27 +97,16 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private void HandleMouseInput()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.LeftShift))  // Start charging on button press
         {
-            lastMousePosition = Input.mousePosition;
-            isDragging = true;
+            isChargingJump = true;
+            jumpChargeStartTime = Time.time;
         }
 
-        if (Input.GetMouseButtonUp(0) && isDragging)
+        if (Input.GetKeyUp(KeyCode.LeftShift) && isChargingJump)  // Release and jump
         {
-            isDragging = false;
-            Vector3 currentMousePosition = Input.mousePosition;
-            float mouseSpeed = (currentMousePosition - lastMousePosition).magnitude / Time.deltaTime;
-
-            if (mouseSpeed > mouseSpeedThreshold)
-            {
-                Jump();
-            }
-        }
-
-        if (isDragging)
-        {
-            lastMousePosition = Input.mousePosition;
+            isChargingJump = false;
+            Jump();  // Call the modified Jump method
         }
     }
     public void Kill()
@@ -159,7 +145,7 @@ public class Player : MonoBehaviourPun, IPunObservable
     }
     private float GetCurrentMicrophoneVolume()
     {
-        return photonVoiceRecorder.LevelMeter.CurrentAvgAmp * 50;
+        return photonVoiceRecorder.LevelMeter.CurrentAvgAmp * 70;
     }
 
     void FixedUpdate()
@@ -182,8 +168,11 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     void Jump()
     {
+
         if (photonView.IsMine && Mathf.Abs(rb.velocity.y) < 0.001f)
         {
+            float chargeDuration = Time.time - jumpChargeStartTime;
+            float jumpForce = Mathf.Clamp(chargeDuration * maxJumpForce, minJumpForce, maxJumpForce);
             rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         }
     }
