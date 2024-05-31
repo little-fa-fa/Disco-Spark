@@ -9,12 +9,26 @@ public class GameManager : MonoBehaviourPunCallbacks
     public GameObject spawnPoint;
     public VoiceFollowClient voiceClient;
 
+    //find pauseMenu
+    public GameObject PauseMenu;
+    public bool isPaused = false;
+
     void Start()
     {
+        PauseMenu.SetActive(false);
+
         if (PhotonNetwork.IsConnectedAndReady)
         {
             PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
             voiceClient = FindAnyObjectByType<VoiceFollowClient>();
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OpenClosePauseMenu();
         }
     }
 
@@ -50,6 +64,20 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         // Additional clean-up logic here
         Debug.Log("Clean-up of network resources complete.");
+    }
+
+    public void OpenClosePauseMenu()
+    {
+        if (!isPaused)
+        {
+            isPaused = true;
+            PauseMenu.SetActive(true);
+        }
+        else
+        {
+            isPaused = false;
+            PauseMenu.SetActive(false);
+        }
     }
 
 
