@@ -1691,6 +1691,7 @@ GameObject:
   - component: {fileID: 1701558163}
   - component: {fileID: 1701558162}
   - component: {fileID: 1701558164}
+  - component: {fileID: 1701558165}
   m_Layer: 0
   m_Name: FinishPoint
   m_TagString: Finish
@@ -1837,6 +1838,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &1701558165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1701558160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149c44642f12542419ecfd99b92895e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRange: 5
 --- !u!1 &1748691717
 GameObject:
   m_ObjectHideFlags: 0
@@ -1853,7 +1867,7 @@ GameObject:
   - component: {fileID: 1748691724}
   m_Layer: 0
   m_Name: Key
-  m_TagString: Untagged
+  m_TagString: Key
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1919,7 +1933,7 @@ Transform:
   m_GameObject: {fileID: 1748691717}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.7077, y: -1.4218, z: 0}
+  m_LocalPosition: {x: 2.88, y: -1.36, z: 0}
   m_LocalScale: {x: 0.85365254, y: 0.8625759, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2444,7 +2458,7 @@ Transform:
   m_GameObject: {fileID: 1984462429}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.3, y: 0.07, z: -0.036392055}
+  m_LocalPosition: {x: -12.19, y: 0.07, z: -0.036392055}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
