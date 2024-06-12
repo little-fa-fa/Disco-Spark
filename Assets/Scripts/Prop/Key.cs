@@ -6,6 +6,8 @@ public class Key : Prop
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("Trigger");
+        Debug.Log(collision.gameObject.name);
         if (collision.gameObject.tag == "Finish")
         {
             Debug.Log("Check");

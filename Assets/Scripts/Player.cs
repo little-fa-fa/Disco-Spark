@@ -177,7 +177,7 @@ public class Player : MonoBehaviourPun, IPunObservable
         }
     }
 
-    void Stop()
+    public void Stop()
     {
         if (photonView.IsMine)
         {

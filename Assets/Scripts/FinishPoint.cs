@@ -8,9 +8,12 @@ public class FinishPoint : MonoBehaviourPunCallbacks
 {
     private bool locked = true;
 
+    public bool isPass = false;
+
     // This is the range within which players need to be to trigger the next level
     public float detectionRange = 5f;
 
+    public GameObject PassMenu;
     // Update is called once per frame
     void Update()
     {
@@ -47,7 +50,9 @@ public class FinishPoint : MonoBehaviourPunCallbacks
 
         if (allPlayersInRange)
         {
-            GoToNextLevel();
+            isPass = true;
+            //GoToNextLevel();
+            PassMenu.SetActive(true);
         }
     }
 
@@ -65,12 +70,18 @@ public class FinishPoint : MonoBehaviourPunCallbacks
         return null;
     }
 
-    private void GoToNextLevel()
+    public void GoToNextLevel()
     {
         // Logic to load the next level
         if (PhotonNetwork.IsMasterClient)
         {
+            PassMenu.SetActive(false);
             PhotonNetwork.LoadLevel("SceneLevel1"); // Replace "NextLevel" with the actual next level name
         }
+    }
+
+    public bool IsPass()
+    {
+        return isPass;
     }
 }

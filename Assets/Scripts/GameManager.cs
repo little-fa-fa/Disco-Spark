@@ -12,6 +12,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     //find pauseMenu
     public GameObject PauseMenu;
     public bool isPaused = false;
+    private bool isPass = false;
+
+    //find passMenu
+    public GameObject PassMenu;
 
     //Disabled player when use pause menu
     private GameObject playerInstance;
@@ -20,6 +24,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     void Start()
     {
         PauseMenu.SetActive(false);
+        PassMenu.SetActive(false);
 
         if (PhotonNetwork.IsConnectedAndReady)
         {
@@ -40,7 +45,31 @@ public class GameManager : MonoBehaviourPunCallbacks
             var playerController = playerInstance.GetComponent<Player>();
             if (playerController != null)
             {
-                playerController.enabled = !isPaused;
+                FinishPoint finishPoint = GameObject.FindObjectOfType<FinishPoint>();
+                isPass = finishPoint.IsPass();
+                Debug.Log("isPause" + isPaused);
+                Debug.Log("isPass" + isPass);
+                if (isPass)
+                {
+                    playerController.enabled = false;
+                }
+                else
+                {
+                    playerController.enabled = true;
+                    if (isPaused)
+                    {
+                        playerController.enabled = false;
+                    }
+                    else
+                    {
+                        playerController.enabled = true;
+                    }
+                }
+   
+                if (!playerController.enabled)
+                {
+                    playerController.Stop();
+                }
             }
         }
     }
