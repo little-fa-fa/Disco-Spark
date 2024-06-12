@@ -97,13 +97,13 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private void HandleMouseInput()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))  // Start charging on button press
+        if (Input.GetMouseButtonDown(0))  // Start charging on button press
         {
             isChargingJump = true;
             jumpChargeStartTime = Time.time;
         }
 
-        if (Input.GetKeyUp(KeyCode.LeftShift) && isChargingJump)  // Release and jump
+        if (Input.GetMouseButtonUp(0) && isChargingJump)  // Release and jump
         {
             isChargingJump = false;
             Jump();  // Call the modified Jump method

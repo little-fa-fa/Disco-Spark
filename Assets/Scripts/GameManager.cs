@@ -13,13 +13,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     public GameObject PauseMenu;
     public bool isPaused = false;
 
+    //Disabled player when use pause menu
+    private GameObject playerInstance;
+
     void Start()
     {
         PauseMenu.SetActive(false);
 
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
             voiceClient = FindAnyObjectByType<VoiceFollowClient>();
         }
     }
@@ -29,6 +32,15 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             OpenClosePauseMenu();
+        }
+
+        if (playerInstance != null)
+        {
+            var playerController = playerInstance.GetComponent<Player>();
+            if (playerController != null)
+            {
+                playerController.enabled = !isPaused;
+            }
         }
     }
 
@@ -68,16 +80,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void OpenClosePauseMenu()
     {
-        if (!isPaused)
-        {
-            isPaused = true;
-            PauseMenu.SetActive(true);
-        }
-        else
-        {
-            isPaused = false;
-            PauseMenu.SetActive(false);
-        }
+        isPaused = !isPaused;
+        PauseMenu.SetActive(isPaused);
     }
 
 
