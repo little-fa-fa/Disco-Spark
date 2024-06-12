@@ -8,6 +8,8 @@ public class Key : Prop
     {
         if (collision.gameObject.tag == "Finish")
         {
+            Debug.Log("Check");
+            Debug.Log(collision.gameObject);
             FinishPoint finishPoint = collision.gameObject.GetComponent<FinishPoint>();
             finishPoint.Unlock();
             Destroy(this.gameObject);

@@ -70,7 +70,7 @@ public class FinishPoint : MonoBehaviourPunCallbacks
         // Logic to load the next level
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.LoadLevel("SampleScene"); // Replace "NextLevel" with the actual next level name
+            PhotonNetwork.LoadLevel("SceneLevel1"); // Replace "NextLevel" with the actual next level name
         }
     }
 }

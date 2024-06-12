@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     //Disabled player when use pause menu
     private GameObject playerInstance;
+    private bool reSpwan = false;
 
     void Start()
     {
@@ -67,7 +68,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             // Example: Optionally destroy all networked objects if you're the room's host
             PhotonNetwork.DestroyAll();
-            
+
         }
         else
         {
@@ -85,6 +86,41 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
 
+    public void SpawnPlayer()
+    {
+        if (playerInstance == null)
+        {
+            if (playerInstance != null)
+            {
+                PhotonNetwork.Destroy(playerInstance);
+                playerInstance = null;
+            }
+            CleanUpResources(); // Clean up resources here
+            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+            voiceClient = FindAnyObjectByType<VoiceFollowClient>();
+        }
+        else
+        {
+            
+            // Move the player back to the spawn point
+            playerInstance.transform.position = spawnPoint.transform.position;
+        }
+    }
 
-    // Optionally handle failed attempt to leave a room
+    public void TestSpawnPlayer()
+    {
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
+        else if (!PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.JoinOrCreateRoom("TestRoom", new Photon.Realtime.RoomOptions { MaxPlayers = 2 }, null);
+        }
+        else
+        {
+            SpawnPlayer();
+        }
+    }
+
 }

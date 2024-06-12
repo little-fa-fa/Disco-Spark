@@ -47,7 +47,7 @@ public class Player : MonoBehaviourPun, IPunObservable
                 Debug.LogError("PhotonVoiceNetwork GameObject not found");
             }
             Camera.main.transform.SetParent(transform);
-            Camera.main.transform.localPosition = new Vector3(0, 2, -10);
+            Camera.main.transform.localPosition = new Vector3(0, 1, -10);
 
             initialPosition = transform.position;
         }
