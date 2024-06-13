@@ -57,7 +57,7 @@ public class Lobby : MonoBehaviourPunCallbacks
             Debug.LogError("Room name cannot be empty.");
             return;
         }
-        RoomOptions options = new RoomOptions { MaxPlayers = 2 };
+        RoomOptions options = new RoomOptions { MaxPlayers = 4 };
         PhotonNetwork.CreateRoom(roomName, options);
     }
 

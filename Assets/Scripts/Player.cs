@@ -15,7 +15,6 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private Recorder photonVoiceRecorder;
     private bool isMoving = false;
-    private int sampleWindow = 128;
     private Vector3 initialPosition;
 
     private bool isChargingJump = false;

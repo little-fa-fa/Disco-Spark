@@ -4030,6 +4030,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPass: 0
+  level:
+  - Tutorial
+  - SceneLevel1
   detectionRange: 5
   PassMenu: {fileID: 1732234817}
 --- !u!1 &1732234817 stripped
@@ -4211,7 +4214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe8073c665ba2144989b6bd97e523fa2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickUpRange: 2
+  pickUpRange: 1
   shrinkSpeed: 2
   followSpeed: 5
   targetScale: {x: 0.5, y: 0.5, z: 0.5}
@@ -4852,6 +4855,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPass: 0
+  level: []
   detectionRange: 5
   PassMenu: {fileID: 1732234817}
 --- !u!19719996 &2001582610
@@ -5164,6 +5168,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1678390028}
+    - target: {fileID: 4176183678344588815, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4413918521891912390, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -5171,6 +5179,14 @@ PrefabInstance:
     - target: {fileID: 5922561244075584163, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8030589414625431357, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1678390028}
+    - target: {fileID: 8030589414625431357, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: UnStuck
       objectReference: {fileID: 0}
     - target: {fileID: 9093111226880458722, guid: 459ae2dd2c28e4975a87cc17f641033f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

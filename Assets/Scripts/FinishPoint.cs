@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class FinishPoint : MonoBehaviourPunCallbacks
 {
     private bool locked = true;
 
     public bool isPass = false;
+
+    public List<string> level = new List<string>();
 
     // This is the range within which players need to be to trigger the next level
     public float detectionRange = 5f;
@@ -76,7 +79,7 @@ public class FinishPoint : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             PassMenu.SetActive(false);
-            PhotonNetwork.LoadLevel("SceneLevel1"); // Replace "NextLevel" with the actual next level name
+            PhotonNetwork.LoadLevel(level[Mathf.Min(level.IndexOf(SceneManager.GetActiveScene().name) + 1, level.Count - 1)]); // Replace "NextLevel" with the actual next level name
         }
     }
 

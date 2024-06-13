@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     //Disabled player when use pause menu
     private GameObject playerInstance;
-    private bool reSpwan = false;
+    // private bool reSpwan = false;
 
     void Start()
     {
@@ -114,6 +114,15 @@ public class GameManager : MonoBehaviourPunCallbacks
         PauseMenu.SetActive(isPaused);
     }
 
+    public void UnStuck()
+    {
+        OpenClosePauseMenu();
+        Player player = playerInstance.GetComponent<Player>();
+        if (player != null && player.photonView.IsMine)
+        {
+            player.Kill();
+        }
+    }
 
     public void SpawnPlayer()
     {
