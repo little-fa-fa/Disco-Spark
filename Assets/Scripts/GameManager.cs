@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Voice;
+using UnityEngine.UI;
+using ExitGames.Client.Photon;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -21,6 +23,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     private GameObject playerInstance;
     // private bool reSpwan = false;
 
+    public static Vector3 sharedSavePoint = Vector3.zero;
+
+    private const string SavePointKey = "SavePoint";
+
     void Start()
     {
         PauseMenu.SetActive(false);
@@ -28,8 +34,11 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+            Vector3 spawnPosition = sharedSavePoint != Vector3.zero ? sharedSavePoint : spawnPoint.transform.position;
+            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
             voiceClient = FindAnyObjectByType<VoiceFollowClient>();
+           
+            
         }
     }
 
@@ -77,9 +86,20 @@ public class GameManager : MonoBehaviourPunCallbacks
     // Call this method when the player chooses to leave the room
     public void LeaveRoom()
     {
-        PhotonNetwork.LeaveRoom();
-        PhotonNetwork.JoinLobby();
-        voiceClient.Disconnect();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            voiceClient.Disconnect();
+            playerInstance.GetComponent<Player>().photonView.RPC("ForceLeaveRoom", RpcTarget.All);
+        }
+        else
+        {
+            PhotonNetwork.LeaveRoom();
+            PhotonNetwork.JoinLobby();
+            voiceClient.Disconnect();
+        }
+        
+
+        
 
     }
 
@@ -126,6 +146,12 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void SpawnPlayer()
     {
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(SavePointKey, out object savePointValue))
+        {
+            Debug.Log("Updating Save Points...");
+            sharedSavePoint = (Vector3)savePointValue;
+        }
+        Vector3 spawnPosition = sharedSavePoint != Vector3.zero ? sharedSavePoint : spawnPoint.transform.position;
         if (playerInstance == null)
         {
             if (playerInstance != null)
@@ -134,14 +160,20 @@ public class GameManager : MonoBehaviourPunCallbacks
                 playerInstance = null;
             }
             CleanUpResources(); // Clean up resources here
-            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+            
+            playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
+            
+           
             voiceClient = FindAnyObjectByType<VoiceFollowClient>();
         }
         else
         {
-            
+
             // Move the player back to the spawn point
-            playerInstance.transform.position = spawnPoint.transform.position;
+            
+           
+                playerInstance.transform.position = spawnPosition;
+            
         }
     }
 
@@ -158,6 +190,22 @@ public class GameManager : MonoBehaviourPunCallbacks
         else
         {
             SpawnPlayer();
+        }
+    }
+
+    public void UpdateSavePoint(Vector3 newSavePoint)
+    {
+        sharedSavePoint = newSavePoint;
+        Hashtable roomProperties = new Hashtable { { SavePointKey, newSavePoint } };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+    }
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        if (propertiesThatChanged.TryGetValue(SavePointKey, out object savePointValue))
+        {
+            Debug.Log($"Room property updated: {SavePointKey} = {savePointValue}");
+            sharedSavePoint = (Vector3)savePointValue; // Synchronize the save point
         }
     }
 

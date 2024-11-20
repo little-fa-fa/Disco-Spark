@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
-
+using ExitGames.Client.Photon;
 public class FinishPoint : MonoBehaviourPunCallbacks
 {
     private bool locked = true;
@@ -79,6 +79,9 @@ public class FinishPoint : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             PassMenu.SetActive(false);
+            ExitGames.Client.Photon.Hashtable roomProperties = new ExitGames.Client.Photon.Hashtable { { "SavePoint", Vector3.zero } };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+            GameManager.sharedSavePoint = Vector3.zero;
             PhotonNetwork.LoadLevel(level[Mathf.Min(level.IndexOf(SceneManager.GetActiveScene().name) + 1, level.Count - 1)]); // Replace "NextLevel" with the actual next level name
         }
     }

@@ -13,9 +13,17 @@ public class Prop : MonoBehaviour
     protected bool isPickedUp = false;
     protected Transform playerTransform;
 
+    protected Vector3 initialPosition;
+    protected GameManager gameManager;
     protected virtual void Start()
     {
         originalScale = transform.localScale;
+        initialPosition = transform.position;
+        gameManager = FindObjectOfType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogError("Game Manager not found for props");
+        }
     }
 
     protected virtual void Update()
@@ -38,6 +46,8 @@ public class Prop : MonoBehaviour
             if (collider.CompareTag("Player"))
             {
                 playerTransform = collider.transform;
+                Player player = collider.GetComponent<Player>();
+                player.props.Add(this);
                 isPickedUp = true;
                 StartCoroutine(Shrink());
                 OnPickUp();
@@ -45,6 +55,8 @@ public class Prop : MonoBehaviour
             }
         }
     }
+
+    
 
     protected virtual IEnumerator Shrink()
     {
@@ -88,5 +100,23 @@ public class Prop : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, pickUpRange);
+    }
+
+    public virtual void Drop()
+    {
+        Vector3 respawnPosition;
+        if (GameManager.sharedSavePoint != Vector3.zero)
+        {
+            respawnPosition = GameManager.sharedSavePoint; 
+        }
+        else
+        {
+            respawnPosition = initialPosition; 
+        }
+
+        transform.position = respawnPosition;
+        isPickedUp = false;
+        StartCoroutine(Shrunk());
+        Debug.Log($"Prop Dropped: {respawnPosition}");
     }
 }

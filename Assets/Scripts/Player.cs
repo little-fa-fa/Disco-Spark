@@ -10,20 +10,30 @@ public class Player : MonoBehaviourPun, IPunObservable
 {
     public Rigidbody2D rb;
     public float moveSpeed = 5f;
-    public float maxJumpForce = 6f;  // Maximum jump force
+    public float maxJumpForce = 3f; 
+    public float chargeRate = 5f;   
+    private bool isChargingJump = false; 
+    private float currentCharge = 0f; 
+
+    public Image chargeBar;  
     public float deceleration = 0.1f;
 
     private Recorder photonVoiceRecorder;
     private bool isMoving = false;
     private Vector3 initialPosition;
 
-    private bool isChargingJump = false;
     private float jumpChargeStartTime;
     private float minJumpForce = 2f;
 
     //Test Volume
     public Text volumeText;
+    public Text latencyText;
 
+    public float gravityScale = 1f;         
+    public float ascentGravityScale = 0.8f; 
+    public float descentGravityScale = 1.5f;
+
+    public List<Prop> props;
     void Start()
     {
         if (photonView.IsMine)
@@ -49,10 +59,24 @@ public class Player : MonoBehaviourPun, IPunObservable
             Camera.main.transform.localPosition = new Vector3(0, 1, -10);
 
             initialPosition = transform.position;
+
+            Collider2D playerCollider = GetComponent<Collider2D>();
+
+            // Ignore collisions with other players
+            Player[] players = FindObjectsOfType<Player>();
+            foreach (Player player in players)
+            {
+                if (player != this) // Ignore self
+                {
+                    Physics2D.IgnoreCollision(playerCollider, player.GetComponent<Collider2D>());
+                }
+            }
+
         }
  
         // Find the existing UI Text component for displaying volume
         volumeText = GameObject.Find("VolumeText").GetComponent<Text>();
+        latencyText = GameObject.Find("LatencyText").GetComponent<Text>();
         if (volumeText != null)
         {
             UnityEngine.Debug.Log("VolumeText UI component found");
@@ -61,12 +85,22 @@ public class Player : MonoBehaviourPun, IPunObservable
         {
             UnityEngine.Debug.LogError("VolumeText UI component not found");
         }
+
+        if (latencyText != null)
+        {
+            UnityEngine.Debug.Log("latencyText UI component found");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("latencyText UI component not found");
+        }
     }
 
     void Update()
     {
         if (photonView.IsMine)  // Example: push-to-talk
         {
+            latencyText.text  = $"Ping: {PhotonNetwork.GetPing()} ms";
             if (isMoving)
             {
                 float currentVolume = GetCurrentMicrophoneVolume();
@@ -90,36 +124,58 @@ public class Player : MonoBehaviourPun, IPunObservable
                 isMoving = false;
             }
             HandleMouseInput();
-
+            if (chargeBar != null)
+            {
+                
+                chargeBar.fillAmount = currentCharge / maxJumpForce;
+            }
         }
     }
 
     private void HandleMouseInput()
     {
-        if (Input.GetMouseButtonDown(0))  // Start charging on button press
+        if (Input.GetMouseButtonDown(0)) // 左键开始蓄力
         {
             isChargingJump = true;
-            jumpChargeStartTime = Time.time;
+            currentCharge = 0f; // 重置蓄力值
         }
 
-        if (Input.GetMouseButtonUp(0) && isChargingJump)  // Release and jump
+        if (Input.GetMouseButtonUp(0) && isChargingJump) // 左键释放跳跃
+        {
+            Jump();
+            
+        }
+
+        if (Input.GetMouseButtonDown(1) && isChargingJump) // 右键取消蓄力
         {
             isChargingJump = false;
-            Jump();  // Call the modified Jump method
+            currentCharge = 0f; // 重置蓄力值
+        }
+
+        if (isChargingJump)
+        {
+            currentCharge += chargeRate * Time.deltaTime;
+            currentCharge = Mathf.Clamp(currentCharge, 0f, maxJumpForce); // 限制最大值
         }
     }
     public void Kill()
     {
         if (photonView.IsMine)
         {
-            Transform closestRespawnPoint = FindClosestRespawnPoint();
-            if (closestRespawnPoint != null)
+            Vector3 respawnPosition = GameManager.sharedSavePoint;
+
+            if (respawnPosition != Vector3.zero)
             {
-                transform.position = closestRespawnPoint.position;
+                transform.position = respawnPosition;
             }
             else
             {
                 transform.position = initialPosition;
+            }
+            for (int i = props.Count - 1; i >= 0; i--) 
+            {
+                props[i].Drop();
+                props.RemoveAt(i);
             }
         }
     }
@@ -153,6 +209,18 @@ public class Player : MonoBehaviourPun, IPunObservable
         {
             return;
         }
+        if (rb.velocity.y > 0.1f) 
+        {
+            rb.gravityScale = ascentGravityScale;
+        }
+        else if (rb.velocity.y < -0.1f)
+        {
+            rb.gravityScale = descentGravityScale;
+        }
+        else
+        {
+            rb.gravityScale = gravityScale;
+        }
 
         // Process movement and jumping here if flags are used
     }
@@ -170,9 +238,9 @@ public class Player : MonoBehaviourPun, IPunObservable
 
         if (photonView.IsMine && Mathf.Abs(rb.velocity.y) < 0.001f)
         {
-            float chargeDuration = Time.time - jumpChargeStartTime;
-            float jumpForce = Mathf.Clamp(chargeDuration * maxJumpForce, minJumpForce, maxJumpForce);
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(0, currentCharge), ForceMode2D.Impulse);
+            isChargingJump = false;
+            currentCharge = 0f;
         }
     }
 
@@ -199,5 +267,14 @@ public class Player : MonoBehaviourPun, IPunObservable
             rb.position = (Vector2)stream.ReceiveNext();
             rb.velocity = (Vector2)stream.ReceiveNext();
         }
+    }
+
+    [PunRPC]
+    public void ForceLeaveRoom()
+    {
+        Debug.Log("Forced to leave room");
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.JoinLobby();
+        
     }
 }
