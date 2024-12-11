@@ -134,12 +134,29 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private void HandleMouseInput()
     {
-        if (Input.GetMouseButtonDown(0)) // 左键开始蓄力
+        if (Input.GetMouseButton(0)) // 左键开始蓄力
         {
             isChargingJump = true;
+            //currentCharge = 0f; // 重置蓄力值
+            currentCharge += chargeRate * Time.deltaTime;
+            currentCharge = Mathf.Clamp(currentCharge, 0f, maxJumpForce);
+        }
+        else
+        {
+            if (isChargingJump)
+            {
+                Jump();
+            }
+            
+        }
+        
+        if (Input.GetMouseButtonDown(1) && isChargingJump) // 右键取消蓄力
+        {
+            isChargingJump = false;
             currentCharge = 0f; // 重置蓄力值
         }
 
+        /*
         if (Input.GetMouseButtonUp(0) && isChargingJump) // 左键释放跳跃
         {
             Jump();
@@ -157,6 +174,7 @@ public class Player : MonoBehaviourPun, IPunObservable
             currentCharge += chargeRate * Time.deltaTime;
             currentCharge = Mathf.Clamp(currentCharge, 0f, maxJumpForce); // 限制最大值
         }
+        */
     }
     public void Kill()
     {
