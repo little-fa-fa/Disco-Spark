@@ -177,20 +177,29 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("Joined Lobby...Creating Room and Player Instance");
+        PhotonNetwork.JoinOrCreateRoom("TestRoom", new Photon.Realtime.RoomOptions { MaxPlayers = 2 }, null);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        Vector3 spawnPosition = sharedSavePoint != Vector3.zero ? sharedSavePoint : spawnPoint.transform.position;
+
+        playerInstance = PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, Quaternion.identity);
+
+
+        voiceClient = FindAnyObjectByType<VoiceFollowClient>();
+    }
+    public override void OnConnectedToMaster()
+    {
+        PhotonNetwork.JoinLobby();
+    }
     public void TestSpawnPlayer()
     {
-        if (!PhotonNetwork.IsConnected)
-        {
-            PhotonNetwork.ConnectUsingSettings();
-        }
-        else if (!PhotonNetwork.InRoom)
-        {
-            PhotonNetwork.JoinOrCreateRoom("TestRoom", new Photon.Realtime.RoomOptions { MaxPlayers = 2 }, null);
-        }
-        else
-        {
-            SpawnPlayer();
-        }
+       
+            PhotonNetwork.ConnectUsingSettings();        
     }
 
     public void UpdateSavePoint(Vector3 newSavePoint)

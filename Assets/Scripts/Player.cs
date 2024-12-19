@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class Player : MonoBehaviourPun, IPunObservable
 {
     public Rigidbody2D rb;
-    public float moveSpeed = 5f;
+    public float moveSpeedTransform = 0.90f;
     public float maxJumpForce = 3f; 
     public float chargeRate = 5f;   
     private bool isChargingJump = false; 
@@ -105,7 +105,7 @@ public class Player : MonoBehaviourPun, IPunObservable
             {
                 float currentVolume = GetCurrentMicrophoneVolume();
                 int db = (int)(20 * Mathf.Log10(currentVolume)+40);
-                rb.velocity = new Vector2(currentVolume, rb.velocity.y);
+                rb.velocity = new Vector2(currentVolume *moveSpeedTransform, rb.velocity.y);
                 
                 volumeText.text = "Volume: " + (db).ToString(); // Update the volume text
 
@@ -134,7 +134,7 @@ public class Player : MonoBehaviourPun, IPunObservable
 
     private void HandleMouseInput()
     {
-        if (Input.GetMouseButton(0)) // 左键开始蓄力
+        if (photonView.IsMine && Input.GetMouseButton(0) && Mathf.Abs(rb.velocity.y) < 0.001f) // 左键开始蓄力
         {
             isChargingJump = true;
             //currentCharge = 0f; // 重置蓄力值

@@ -243,7 +243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 595663219497935255}
-  moveSpeed: 0.5
+  moveSpeedTransform: 0.9
   maxJumpForce: 8
   chargeRate: 5
   chargeBar: {fileID: 6102590308644154924}
